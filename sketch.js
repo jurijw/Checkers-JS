@@ -1,5 +1,3 @@
-// import { Board } from "./board.js";
-
 // Window settings
 const width = 800;
 const height = 800;
