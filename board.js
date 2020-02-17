@@ -8,22 +8,22 @@ class Board {
         if (!this.board[j]) {
           this.board[j] = [];
         }
-        this.board[j][i] = 0;
+        this.board[j][i] = new Piece(i, j, true, true);
 
         // Add white pieces (1)
         if (i % 2 === 0 && j === 1) {
-          this.board[j][i] = 1;
+          this.board[j][i] = new Piece(i, j, true, false);
         }
         if (i % 2 !== 0 && (j === 0 || j === 2)) {
-          this.board[j][i] = 1;
+          this.board[j][i] = new Piece(i, j, true, false);
         }
 
         // Add red pieces (-1)
         if (i % 2 === 0 && (j === 5 || j === 7)) {
-          this.board[j][i] = -1;
+          this.board[j][i] = new Piece(i, j, false, false);
         }
         if (i % 2 !== 0 && j === 6) {
-          this.board[j][i] = -1;
+          this.board[j][i] = new Piece(i, j, false, false);
         }
       }
     }
@@ -52,23 +52,31 @@ class Board {
 
     for (let i = 0; i < 8; i++) {
       for (let j = 0; j < 8; j++) {
-        // Display white pieces
-        if (this.board[j][i] === 1) {
-          fill(255);
-          circle(
-            (i * width) / 8 + width / 16,
-            (j * width) / 8 + width / 16,
-            radius
-          );
-        }
-        // Display red pieces
-        if (this.board[j][i] === -1) {
-          fill(184, 30, 0);
-          circle(
-            (i * width) / 8 + width / 16,
-            (j * width) / 8 + width / 16,
-            radius
-          );
+        // Get the piece on the associated square
+        let piece = this.board[j][i];
+
+        // Don't draw empty squares
+        if (!piece.empty) {
+          // Calculate the center of the piece
+          let centerX = (i * width) / 8 + width / 16;
+          let centerY = (j * width) / 8 + width / 16;
+          // Display white pieces
+          if (piece.isWhite) {
+            fill(255);
+            circle(centerX, centerY, radius);
+          }
+
+          // Display red pieces
+          if (!piece.isWhite) {
+            fill(184, 30, 0);
+            circle(centerX, centerY, radius);
+          }
+
+          // Outline selected piece
+          if (piece.selected) {
+            fill(0, 0, 220);
+            circle(centerX, centerY, radius, 2);
+          }
         }
       }
     }
