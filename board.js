@@ -87,23 +87,30 @@ class Board {
               // Check if there is an opposite colored piece on the square
               let neighbor = this.board[neighborY][neighborX];
               if (!neighbor.empty && neighbor.isWhite !== piece.isWhite) {
-                // Check the square behind it
-                let squareBehindNeighbor = this.board[squareBehindNeighborY][
-                  squareBehindNeighborX
-                ];
+                // Check the square behind it (if it is on the board)
+                if (
+                  squareBehindNeighborX >= 0 &&
+                  squareBehindNeighborX < 8 &&
+                  squareBehindNeighborY >= 0 &&
+                  squareBehindNeighborY < 8
+                ) {
+                  let squareBehindNeighbor = this.board[squareBehindNeighborY][
+                    squareBehindNeighborX
+                  ];
 
-                // If its empty add this move to the capturing moves of the current piece
-                if (squareBehindNeighbor.empty) {
-                  let piecePos = [i, j];
-                  let endPos = [squareBehindNeighborX, squareBehindNeighborY];
-                  let intermediateSteps = [[neighborX, neighborY]];
+                  // If its empty add this move to the capturing moves of the current piece
+                  if (squareBehindNeighbor.empty) {
+                    let piecePos = [i, j];
+                    let endPos = [squareBehindNeighborX, squareBehindNeighborY];
+                    let intermediateSteps = [[neighborX, neighborY]];
 
-                  // FIX: currently we push the pieces position, once for every move it makes although it would make more sense to push the
-                  // position of the piece just once with all the posible moves it can make
-                  allCapturingMoves.push([
-                    piecePos,
-                    [endPos, intermediateSteps]
-                  ]);
+                    // FIX: currently we push the pieces position, once for every move it makes although it would make more sense to push the
+                    // position of the piece just once with all the posible moves it can make
+                    allCapturingMoves.push([
+                      piecePos,
+                      [endPos, intermediateSteps]
+                    ]);
+                  }
                 }
               } else if (neighbor.empty) {
                 let piecePos = [i, j];
@@ -307,26 +314,91 @@ class Board {
     // Update each pieces valid moves
     this.updatePerPieceValidMoves();
   }
+
+  // For the AI
 }
 
-function simulateMovesRecursively(boardCopy, piece) {
-  // Base case - No more capturing moves can be made
-  if (!boardCopy.validMoves[0]) {
+// function simulateMovesRecursively(boardCopy, piece) {
+//   // Base case - No more capturing moves can be made
+//   if (!boardCopy.validMoves[0]) {
+//     return true;
+//   }
+//   // Recursive case - Capturing moves can be made
+//   else {
+//     for (let moveInfo of boardCopy.validMoves[1]) {
+//       // Disect moveInfo
+//       let initialX = moveInfo[0][0];
+//       let initalY = moveInfo[0][1];
+//       let finalX = moveInfo[1][0][0];
+//       let finalY = moveInfo[1][0][1];
+//       let intermediateSteps = moveInfo[1][1];
+//       // Simulate the move
+//       boardCopy.move(initalX, initalY, finalX, finalY, intermediateSteps);
+//     }
+//   }
+// }
+
+function simulateCaptureRecursively(
+  boardCopy,
+  pieceCopy,
+  intermediateSteps = undefined
+) {
+  // Takes a piece that can capture and simulates all possible sequential capturing routes
+
+  if (intermediateSteps === undefined) {
+    intermediateSteps = [];
+  }
+
+  let moveInfo = pieceCopy.validMoves;
+
+  // Basecases
+
+  // No more moves are available
+  if (moveInfo.length === 0) {
+    // Append the path
+
+    // Return true
     return true;
   }
-  // Recursive case - Capturing moves can be made
-  else {
-    for (let moveInfo of boardCopy.validMoves[1]) {
-      // Disect moveInfo
-      let initialX = moveInfo[0][0];
-      let initalY = moveInfo[0][1];
-      let finalX = moveInfo[1][0][0];
-      let finalY = moveInfo[1][0][1];
-      let intermediateSteps = moveInfo[1][1];
-      // Simulate the move
-      boardCopy.move(initalX, initalY, finalX, finalY, intermediateSteps);
+
+  //No more capturing moves available
+  let canCapture = false;
+  for (let i = 0; i < moveInfo.length; i++) {
+    if (moveInfo[i][1].length > 0) {
+      canCapture = true;
+      break;
+    }
+  }
+  if (!canCapture) {
+    // Append the path
+
+    // Return true
+    return true;
+  }
+
+  // Recrusive Case - captures can be made
+
+  // Get piece info
+  let initialX = pieceCopy.x;
+  let initialY = pieceCopy.y;
+
+  // Loop through possible capturing moves
+  for (let i = 0; i < moveInfo.length; i++) {
+    // Disect the moveInfo
+    let finalX = moveInfo[i][0][0];
+    let finalY = moveInfo[i][0][1];
+    let intermediateStep = moveInfo[i][1];
+
+    // Add the intermediate step to the intermediateSteps array
+    intermediateSteps.push(intermediateStep);
+    // FIX: Simulate the move on a copy of the board
+    // let newCopied Piece, newCopiedBoard
+    // newCopiedBoard.move(...)
+
+    if (simulateCaptureRecursively(newCopiedBoard, newCopiedPiece)) {
+      return true;
+    } else {
+      return false;
     }
   }
 }
-
-function simulateCaptureRecursively(boardCopy, pieceCopy) {}
