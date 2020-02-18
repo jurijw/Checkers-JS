@@ -2,6 +2,11 @@ class Board {
   constructor() {
     this.whiteTurn = false;
     this.board = [];
+
+    // Keep track of the last piece that moved
+    this.lastMoved = undefined;
+    this.captureOnLastMove = false;
+
     // populate the board
     for (let i = 0; i < 8; i++) {
       for (let j = 0; j < 8; j++) {
@@ -29,6 +34,7 @@ class Board {
       }
     }
 
+    // Calculate the valid moves
     this.validMoves = this.updateValidMoves();
   }
 
@@ -42,8 +48,8 @@ class Board {
     for (let i = 0; i < 8; i++) {
       for (let j = 0; j < 8; j++) {
         let piece = this.board[j][i];
-        // If the square is not empty
-        if (!piece.empty) {
+        // If the square is not empty or not the current players piece
+        if (!piece.empty && piece.isWhite === this.whiteTurn) {
           // Get the vectors to the squares the piece can move to
           if (piece.crowned) {
             vectors = [
@@ -64,8 +70,6 @@ class Board {
             ];
           }
 
-          let pieceSingleSquareMoves = []; // Array for single square moves
-          let pieceCapturingMoves = []; // Array to store capturing moves for that piece
           for (let vector of vectors) {
             // Calculate useful indices (positions of squares)
             let neighborX = i + vector[0];
@@ -93,7 +97,9 @@ class Board {
                   let piecePos = [i, j];
                   let endPos = [squareBehindNeighborX, squareBehindNeighborY];
                   let intermediateSteps = [[neighborX, neighborY]];
-                  pieceCapturingMoves.push([endPos, intermediateSteps]);
+
+                  // FIX: currently we push the pieces position, once for every move it makes although it would make more sense to push the
+                  // position of the piece just once with all the posible moves it can make
                   allCapturingMoves.push([
                     piecePos,
                     [endPos, intermediateSteps]
@@ -103,7 +109,6 @@ class Board {
                 let piecePos = [i, j];
                 let endPos = [neighborX, neighborY];
                 let intermediateSteps = [];
-                pieceSingleSquareMoves.push([endPos, intermediateSteps]);
                 allSingleSquareMoves.push([
                   piecePos,
                   [endPos, intermediateSteps]
@@ -146,16 +151,56 @@ class Board {
   move(initialX, initialY, finalX, finalY, intermediateSteps) {
     // Get reference to the piece
     let piece = this.board[initialY][initialX];
+
     // Overwrite the target
     this.board[finalY][finalX] = piece;
+
+    // Update piece properties and check for crowning
+    piece.update(finalX, finalY);
+
     // Remove the piece reference from the original position
     this.board[initialY][initialX] = new Piece(initialX, initialY, true, true);
-    // Remove all pieces in intermediateSteps
+
+    // In case of a capture
     if (intermediateSteps.length > 0) {
+      // Remove all pieces in intermediateSteps (All captured pieces)
       for (let step of intermediateSteps) {
         let stepX = step[0];
         let stepY = step[1];
         this.board[stepY][stepX] = new Piece(stepX, stepY, true, true);
+      }
+
+      // Update the capture on last move property
+      this.captureOnLastMove = true;
+    } else {
+      // If no capture was made
+      this.captureOnLastMove = false;
+    }
+
+    // Update the last moved property
+    this.lastMoved = piece;
+  }
+
+  checkForTurnSwitch() {
+    let piece = this.lastMoved;
+    // If no piece was captured or if the piece cannot move anymore, switch turns
+    if (!this.captureOnLastMove || piece.validMoves.length === 0) {
+      this.whiteTurn = !this.whiteTurn;
+    }
+    // Otherwise check if the capturing piece can make another capture
+    else {
+      let canCapture = false;
+      let moves = piece.validMoves;
+      for (i = 0; i < moves.length; i++) {
+        let intermediateSteps = moves[i][1];
+        if (intermediateSteps.length > 0) {
+          canCapture = true;
+          break;
+        }
+      }
+      // If it cannot make another capture swith the turn
+      if (!canCapture) {
+        this.whiteTurn = !this.whiteTurn;
       }
     }
   }
@@ -227,24 +272,61 @@ class Board {
       }
     }
   }
+
+  toTestBoard() {
+    // Set up a board for testing double captures
+
+    // Clear the board
+    for (let i = 0; i < 8; i++) {
+      for (let j = 0; j < 8; j++) {
+        this.board[j][i] = new Piece(i, j, true, true);
+      }
+    }
+
+    // Add pieces
+    this.board[1][1] = new Piece(1, 1, true, false);
+    this.board[1][5] = new Piece(5, 1, true, false);
+
+    this.board[3][3] = new Piece(3, 3, false, false);
+    this.board[4][2] = new Piece(2, 4, false, false);
+    this.board[4][4] = new Piece(4, 4, false, false);
+    this.board[6][2] = new Piece(2, 6, false, false);
+  }
+
+  update() {
+    // Clears some board properties and recalculates valid moves
+    this.validMoves = [];
+    for (let i = 0; i < 8; i++) {
+      for (let j = 0; j < 8; j++) {
+        this.board[j][i].validMoves = [];
+      }
+    }
+
+    // Update the boards valid moves
+    this.updateValidMoves();
+    // Update each pieces valid moves
+    this.updatePerPieceValidMoves();
+  }
 }
 
-// function simulateMovesRecursively(boardCopy, piece) {
-//   // Base case - No more capturing moves can be made
-//   if (!boardCopy.validMoves[0]) {
-//     return true;
-//   }
-//   // Recursive case - Capturing moves can be made
-//   else {
-//     for (let moveInfo of boardCopy.validMoves[1]) {
-//       // Disect moveInfo
-//       let initialX = moveInfo[0][0];
-//       let initalY = moveInfo[0][1];
-//       let finalX = moveInfo[1][0][0];
-//       let finalY = moveInfo[1][0][1];
-//       let intermediateSteps = moveInfo[1][1];
-//       // Simulate the move
-//       boardCopy.move(initalX, initalY, finalX, finalY, intermediateSteps);
-//     }
-//   }
-// }
+function simulateMovesRecursively(boardCopy, piece) {
+  // Base case - No more capturing moves can be made
+  if (!boardCopy.validMoves[0]) {
+    return true;
+  }
+  // Recursive case - Capturing moves can be made
+  else {
+    for (let moveInfo of boardCopy.validMoves[1]) {
+      // Disect moveInfo
+      let initialX = moveInfo[0][0];
+      let initalY = moveInfo[0][1];
+      let finalX = moveInfo[1][0][0];
+      let finalY = moveInfo[1][0][1];
+      let intermediateSteps = moveInfo[1][1];
+      // Simulate the move
+      boardCopy.move(initalX, initalY, finalX, finalY, intermediateSteps);
+    }
+  }
+}
+
+function simulateCaptureRecursively(boardCopy, pieceCopy) {}
