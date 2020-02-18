@@ -6,6 +6,9 @@ const fps = 60;
 // Initialize the board
 const playingBoard = new Board();
 
+// Do this once per move
+playingBoard.updatePerPieceValidMoves();
+
 // Variables that need to be able to be modified
 let started = false;
 let selectionX = undefined;
@@ -32,12 +35,10 @@ function mousePressed() {
     if (selectionX !== undefined && selectionY !== undefined) {
       // Unselect old piece
       playingBoard.board[selectionY][selectionX].selected = false;
-      console.log("weehee");
     }
     // Convert selection to index
     selectionX = Math.floor(x / (width / 8));
     selectionY = Math.floor(y / (height / 8));
-    console.log(selectionX, selectionY);
 
     // Select new piece
     playingBoard.board[selectionY][selectionX].selected = true;

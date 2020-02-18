@@ -126,6 +126,23 @@ class Board {
     }
   }
 
+  updatePerPieceValidMoves() {
+    // Updates the boards valid moves and asigns each piece on the board its valid moves
+
+    for (let moveInfo of this.validMoves[1]) {
+      // Disect moveInfo
+      let initialX = moveInfo[0][0];
+      let initialY = moveInfo[0][1];
+      let finalX = moveInfo[1][0][0];
+      let finalY = moveInfo[1][0][1];
+      let intermediateSteps = moveInfo[1][1];
+
+      // Get a reference to the piece
+      let piece = this.board[initialY][initialX];
+      piece.validMoves.push([[finalX, finalY], intermediateSteps]);
+    }
+  }
+
   move(initialX, initialY, finalX, finalY, intermediateSteps) {
     // Get reference to the piece
     let piece = this.board[initialY][initialX];
@@ -147,6 +164,7 @@ class Board {
     // Fill the background
     background(181, 136, 99);
     fill(240, 217, 181);
+    stroke(255);
     // Add the light squares
     for (let i = 0; i < 8; i++) {
       for (let j = 0; j < 8; j++) {
@@ -173,16 +191,18 @@ class Board {
         if (!piece.empty) {
           // Calculate the center of the piece
           let centerX = (i * width) / 8 + width / 16;
-          let centerY = (j * width) / 8 + width / 16;
+          let centerY = (j * height) / 8 + height / 16;
           // Display white pieces
           if (piece.isWhite) {
             fill(255);
+            stroke(0);
             circle(centerX, centerY, radius);
           }
 
           // Display red pieces
           if (!piece.isWhite) {
             fill(184, 30, 0);
+            stroke(255);
             circle(centerX, centerY, radius);
           }
 
@@ -190,6 +210,18 @@ class Board {
           if (piece.selected) {
             fill(100, 220, 100);
             circle(centerX, centerY, radius, 2);
+            // Highlight possible moves
+            for (let moveInfo of piece.validMoves) {
+              // Get the position to be highlighted
+              let highlightX = moveInfo[0][0];
+              let highlightY = moveInfo[0][1];
+              let highlightCenterX = (highlightX * width) / 8 + width / 16;
+              let highlightCenterY = (highlightY * height) / 8 + height / 16;
+              // Draw a circle with no fill at that position
+              noFill();
+              stroke(255);
+              circle(highlightCenterX, highlightCenterY, radius);
+            }
           }
         }
       }
@@ -197,14 +229,22 @@ class Board {
   }
 }
 
-function simulateMovesRecursively(boardCopy) {
-  // Base case - No more capturing moves can be made
-  if (!boardCopy.validMoves[0]) {
-    return true;
-  }
-  // Recursive case - Capturing moves can be made
-  else {
-    for (let moveInfo of boardCopy.validMoves) {
-    }
-  }
-}
+// function simulateMovesRecursively(boardCopy, piece) {
+//   // Base case - No more capturing moves can be made
+//   if (!boardCopy.validMoves[0]) {
+//     return true;
+//   }
+//   // Recursive case - Capturing moves can be made
+//   else {
+//     for (let moveInfo of boardCopy.validMoves[1]) {
+//       // Disect moveInfo
+//       let initialX = moveInfo[0][0];
+//       let initalY = moveInfo[0][1];
+//       let finalX = moveInfo[1][0][0];
+//       let finalY = moveInfo[1][0][1];
+//       let intermediateSteps = moveInfo[1][1];
+//       // Simulate the move
+//       boardCopy.move(initalX, initalY, finalX, finalY, intermediateSteps);
+//     }
+//   }
+// }

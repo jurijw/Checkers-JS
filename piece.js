@@ -8,5 +8,6 @@ class Piece {
     // Default initialization values
     this.crowned = false;
     this.selected = false;
+    this.validMoves = [];
   }
 }
