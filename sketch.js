@@ -78,14 +78,17 @@ function mousePressed() {
               intermediateSteps
             );
 
-            // Change the player's turn if no capture was made and update the board
-            if (intermediateSteps.length === 0) {
-              playingBoard.whiteTurn = !playingBoard.whiteTurn;
-            }
-            // else {
-            //   // If a capture was made check if another capture can be made
-            //   for (let i = 0; i < )
+            // // Change the player's turn if no capture was made and update the board
+            // if (intermediateSteps.length === 0) {
+            //   playingBoard.whiteTurn = !playingBoard.whiteTurn;
             // }
+            // // else {
+            // //   // If a capture was made check if another capture can be made
+            // //   for (let i = 0; i < )
+            // // }
+            playingBoard.update();
+            console.log(playingBoard.lastMoved, playingBoard.captureOnLastMove);
+            playingBoard.checkForTurnSwitch();
             playingBoard.update();
 
             // Set moveMade to true and the selections to undefined

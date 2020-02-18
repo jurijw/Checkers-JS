@@ -191,7 +191,7 @@ class Board {
     else {
       let canCapture = false;
       let moves = piece.validMoves;
-      for (i = 0; i < moves.length; i++) {
+      for (let i = 0; i < moves.length; i++) {
         let intermediateSteps = moves[i][1];
         if (intermediateSteps.length > 0) {
           canCapture = true;
