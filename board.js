@@ -28,9 +28,11 @@ class Board {
         }
       }
     }
+
+    this.validMoves = this.updateValidMoves();
   }
 
-  validMoves() {
+  updateValidMoves() {
     let validMoves = {};
     let allCapturingMoves = [];
     let allSingleSquareMoves = [];
@@ -90,7 +92,7 @@ class Board {
                 if (squareBehindNeighbor.empty) {
                   let piecePos = [i, j];
                   let endPos = [squareBehindNeighborX, squareBehindNeighborY];
-                  let intermediateSteps = [[neighborY, neighborX]];
+                  let intermediateSteps = [[neighborX, neighborY]];
                   pieceCapturingMoves.push([endPos, intermediateSteps]);
                   allCapturingMoves.push([
                     piecePos,
@@ -99,7 +101,7 @@ class Board {
                 }
               } else if (neighbor.empty) {
                 let piecePos = [i, j];
-                let endPos = [neighborY, neighborX];
+                let endPos = [neighborX, neighborY];
                 let intermediateSteps = [];
                 pieceSingleSquareMoves.push([endPos, intermediateSteps]);
                 allSingleSquareMoves.push([
@@ -114,11 +116,30 @@ class Board {
     }
     // If capturing moves can be made, add only these to the pieces valid moves
     if (allCapturingMoves.length > 0) {
-      return allCapturingMoves;
+      let canMakeCapturingMove = true;
+      this.validMoves = [canMakeCapturingMove, allCapturingMoves];
     } else if (allSingleSquareMoves.length > 0) {
-      return allSingleSquareMoves;
+      let canMakeCapturingMove = false;
+      return (this.validMoves = [canMakeCapturingMove, allSingleSquareMoves]);
     } else {
-      return [];
+      return (this.validMoves = []);
+    }
+  }
+
+  move(initialX, initialY, finalX, finalY, intermediateSteps) {
+    // Get reference to the piece
+    let piece = this.board[initialY][initialX];
+    // Overwrite the target
+    this.board[finalY][finalX] = piece;
+    // Remove the piece reference from the original position
+    this.board[initialY][initialX] = new Piece(initialX, initialY, true, true);
+    // Remove all pieces in intermediateSteps
+    if (intermediateSteps.length > 0) {
+      for (let step of intermediateSteps) {
+        let stepX = step[0];
+        let stepY = step[1];
+        this.board[stepY][stepX] = new Piece(stepX, stepY, true, true);
+      }
     }
   }
 
@@ -172,6 +193,18 @@ class Board {
           }
         }
       }
+    }
+  }
+}
+
+function simulateMovesRecursively(boardCopy) {
+  // Base case - No more capturing moves can be made
+  if (!boardCopy.validMoves[0]) {
+    return true;
+  }
+  // Recursive case - Capturing moves can be made
+  else {
+    for (let moveInfo of boardCopy.validMoves) {
     }
   }
 }
