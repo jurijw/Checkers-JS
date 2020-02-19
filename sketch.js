@@ -11,6 +11,9 @@ playingBoard.toTestBoard();
 // Do this once per move
 playingBoard.update();
 
+// let piece =
+// simulateCaptureRecursively(playingBoard, )
+
 // Variables that need to be able to be modified
 let started = false;
 let selectionX = undefined;

@@ -346,12 +346,20 @@ class Board {
 
     // Clone the last moved piece
 
-    // Get its position
-    let lastMovedX = this.lastMoved.x;
-    let lastMovedY = this.lastMoved.y;
-    // Get the appropriate piece on the cloned board
-    let clonedLastMoved = clonedBoard.board[lastMovedY][lastMovedX];
-    clonedBoard.lastMoved = clonedLastMoved;
+    // Check if it is undefined
+    if (this.lastMoved === undefined) {
+      clonedBoard.lastMoved = undefined;
+    } else {
+      // Get its position
+      let lastMovedX = this.lastMoved.x;
+      let lastMovedY = this.lastMoved.y;
+      // Get the appropriate piece on the cloned board
+      let clonedLastMoved = clonedBoard.board[lastMovedY][lastMovedX];
+      clonedBoard.lastMoved = clonedLastMoved;
+    }
+
+    // Return the cloned board object
+    return clonedBoard;
   }
 }
 
@@ -374,68 +382,3 @@ class Board {
 //     }
 //   }
 // }
-
-function simulateCaptureRecursively(
-  boardCopy,
-  pieceCopy,
-  intermediateSteps = undefined
-) {
-  // Takes a piece that can capture and simulates all possible sequential capturing routes
-
-  if (intermediateSteps === undefined) {
-    intermediateSteps = [];
-  }
-
-  let moveInfo = pieceCopy.validMoves;
-
-  // Basecases
-
-  // No more moves are available
-  if (moveInfo.length === 0) {
-    // Append the path
-
-    // Return true
-    return true;
-  }
-
-  //No more capturing moves available
-  let canCapture = false;
-  for (let i = 0; i < moveInfo.length; i++) {
-    if (moveInfo[i][1].length > 0) {
-      canCapture = true;
-      break;
-    }
-  }
-  if (!canCapture) {
-    // Append the path
-
-    // Return true
-    return true;
-  }
-
-  // Recrusive Case - captures can be made
-
-  // Get piece info
-  let initialX = pieceCopy.x;
-  let initialY = pieceCopy.y;
-
-  // Loop through possible capturing moves
-  for (let i = 0; i < moveInfo.length; i++) {
-    // Disect the moveInfo
-    let finalX = moveInfo[i][0][0];
-    let finalY = moveInfo[i][0][1];
-    let intermediateStep = moveInfo[i][1];
-
-    // Add the intermediate step to the intermediateSteps array
-    intermediateSteps.push(intermediateStep);
-    // FIX: Simulate the move on a copy of the board
-    // let newCopied Piece, newCopiedBoard
-    // newCopiedBoard.move(...)
-
-    if (simulateCaptureRecursively(newCopiedBoard, newCopiedPiece)) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-}
