@@ -52,7 +52,7 @@ class Piece {
       clonedValidMoves.push(clonedMoveInfo);
     }
     // Add the cloned valid moves to the cloned piece properties
-    clonedPiece.validMoves = this.clonedValidMoves;
+    clonedPiece.validMoves = clonedValidMoves;
 
     return clonedPiece;
   }

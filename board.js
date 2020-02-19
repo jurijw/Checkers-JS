@@ -1,11 +1,14 @@
 class Board {
   constructor() {
+    // Track who's turn it is
     this.whiteTurn = false;
-    this.board = [];
 
     // Keep track of the last piece that moved
     this.lastMoved = undefined;
     this.captureOnLastMove = false;
+
+    // An array to store the Piece objects that will populate the board
+    this.board = [];
 
     // populate the board
     for (let i = 0; i < 8; i++) {
@@ -315,7 +318,41 @@ class Board {
     this.updatePerPieceValidMoves();
   }
 
-  // For the AI
+  clone() {
+    // Clones the board object so that there are no cross-references between the clone and the original
+
+    // Initialize a new board
+    let clonedBoard = new Board();
+
+    // Clone primitives //
+
+    clonedBoard.whiteTurn = this.whiteTurn;
+    clonedBoard.captureOnLastMove = this.captureOnLastMove;
+
+    // Clone objects //
+
+    // Clone the board
+    for (let i = 0; i < 8; i++) {
+      for (let j = 0; j < 8; j++) {
+        // Lazy loading of 2d array
+        if (!clonedBoard.board[j]) {
+          clonedBoard.board[j] = [];
+        }
+
+        // Copy the Piece to the correct position
+        clonedBoard.board[j][i] = this.board[j][i].clone();
+      }
+    }
+
+    // Clone the last moved piece
+
+    // Get its position
+    let lastMovedX = this.lastMoved.x;
+    let lastMovedY = this.lastMoved.y;
+    // Get the appropriate piece on the cloned board
+    let clonedLastMoved = clonedBoard.board[lastMovedY][lastMovedX];
+    clonedBoard.lastMoved = clonedLastMoved;
+  }
 }
 
 // function simulateMovesRecursively(boardCopy, piece) {
