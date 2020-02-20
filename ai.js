@@ -126,18 +126,16 @@ function staticEval(board) {
   return eval;
 }
 
-function minimax(board, depth, whiteTurn) {
-  // Base case - max depth reached
-  // FIX: need to check for game over
-  if (depth === 0) {
-    return staticEval(board);
-  }
-
-  // Simulate all possible moves
-  let simulatedBoards = [];
+function neatifyAllMoves(board) {
+  // Takes a board object and returns all possible moves (where one move may involve
+  // several steps and only ends once a players turn is over) in a neatly ordered array
 
   let validMoves = board.validMoves;
   let canCapture = validMoves[0];
+
+  // An array to store all moves to be analyzed
+  let allPossibleMoves = [];
+
   // Loop through all valid moves
   for (let moveInfo of validMoves[1]) {
     // Disect the move info
@@ -150,9 +148,104 @@ function minimax(board, depth, whiteTurn) {
     let intermediateSteps = moveInfo[1][1];
 
     // If the piece can capture loop through all sequential capturing moves.
+    if (canCapture) {
+      // Get the current capturing piece
+      let piece = board.board[initialY][initialX];
+
+      // Get all possible sequential capturing routes
+      let sequentialCaptureMoves = simulateCaptureRecursively(board, piece);
+
+      for (let captureMove of sequentialCaptureMoves) {
+        finalX = captureMove[0][0];
+        finalY = captureMove[0][1];
+
+        // Get the intermediate moves
+        intermediateSteps = captureMove.splice(1);
+
+        // Push the move sequence to all possible moves array
+        allPossibleMoves.push([
+          initialX,
+          initialY,
+          finalX,
+          finalY,
+          intermediateSteps
+        ]);
+      }
+    }
+    // Otherwise just append the single square move to all possible moves
+    else {
+      // Format [initialX, initialY, finalX, finalY, intermediateSteps]
+      allPossibleMoves.push([
+        initialX,
+        initialY,
+        finalX,
+        finalY,
+        intermediateSteps
+      ]);
+    }
   }
 
+  // Return the array of all possible moves
+  return allPossibleMoves;
+}
+
+function miniMax(board, depth, whiteTurn) {
+  // Base case - max depth reached
+  // FIX: need to check for game over
+  if (depth === 0) {
+    return staticEval(board);
+  }
+
+  // Simulate all possible moves
+  let simulatedBoards = [];
+
+  // Get all possible moves (these are in the format [[initialX, initialY, finalX, finalY, intermediateSteps], ..])
+  let allMoves = neatifyAllMoves(board);
+
+  // Loop through all moves
+  for (let move of allMoves) {
+    // Disect the move
+    let initialX = move[0];
+    let initialY = move[1];
+    let finalX = move[2];
+    let finalY = move[3];
+    let intermediateSteps = move[4];
+
+    // Clone the board
+    let clonedBoard = board.clone();
+
+    // Execute the move on the cloned baord
+    clonedBoard.move(initialX, initialY, finalX, finalY, intermediateSteps);
+
+    // Add the board to the simulatedBoards array
+    simulatedBoards.push(clonedBoard);
+  }
+
+  // adapted from https://www.youtube.com/watch?v=l-hh51ncgDI
+  // If it's white turn try to maximize the evaluation
   if (whiteTurn) {
     let maxEval = -Infinity;
+
+    // Loop through all possible child positions
+    for (let simulatedBoard of simulatedBoards) {
+      // Recursively call the miniMax function
+      eval = miniMax(simulatedBoard, depth - 1, false);
+      // Determine the maximizing evaluation and return it
+      maxEval = max(eval, maxEval);
+      return maxEval;
+    }
+  }
+  // Otherwise, try to minimize the evaluation
+  else {
+    let minEval = Infinity;
+
+    // Loop through all possible child positions
+    for (let simulatedBoard of simulatedBoards) {
+      // Recursively call the miniMax function
+      eval = miniMax(simulatedBoard, depth - 1, true);
+      // Determine the minimizing evaluation and return it
+      minEval = min(eval, minEval);
+      return minEval;
+    }
   }
 }
