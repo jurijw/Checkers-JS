@@ -12,8 +12,6 @@ function simulateCaptureRecursively(board, piece, stepSequence = undefined) {
 
   // No more moves are available
   if (validMoves.length === 0) {
-    // Append the path
-
     // Return true
     return true;
   }
@@ -27,8 +25,6 @@ function simulateCaptureRecursively(board, piece, stepSequence = undefined) {
     }
   }
   if (!canCapture) {
-    // Append the path
-
     // Return true
     return true;
   }
@@ -41,10 +37,13 @@ function simulateCaptureRecursively(board, piece, stepSequence = undefined) {
 
   // Loop through possible capturing moves
   for (let i = 0; i < validMoves.length; i++) {
+    // console.log(piece);
     // Disect the validMoves
     let finalX = validMoves[i][0][0];
     let finalY = validMoves[i][0][1];
+    // FIX? previously was
     let intermediateStep = validMoves[i][1];
+    //let intermediateStep = validMoves[i][1][0];
 
     // Add the intermediate step to the stepSequence array //
 
@@ -66,64 +65,15 @@ function simulateCaptureRecursively(board, piece, stepSequence = undefined) {
     clonedBoard.move(initialX, initialY, finalX, finalY, intermediateStep);
     clonedBoard.update();
     // Update the final position of the piece
-    console.log(finalX, finalY);
     let newFinalPos = [finalX, finalY];
     stepSequence[i][0] = newFinalPos;
 
     // Recurse
     if (simulateCaptureRecursively(clonedBoard, clonedPiece, stepSequence)) {
-      console.log(stepSequence);
     }
   }
   // Return the final step sequence
   return stepSequence;
-}
-
-function staticEval(board) {
-  // Takes a board object and returns a float loosely representing the evaluation of either players
-  // chances to win. A positive outcome means white is evaluated better, a negative outcome means red
-  // Is evaluated as having a better position.
-
-  // Set up some basic values
-  let eval = 0;
-
-  let pieceVal = 1;
-  let edgePieceVal = 1.1;
-  let crownedPieceVal = 1.6;
-
-  // Loop through the board
-  for (let i = 0; i < 8; i++) {
-    for (let j = 0; j < 8; j++) {
-      // Get the square / piece in question
-      let piece = board.board[j][i];
-
-      // Make sure the square is not empty
-      if (!piece.empty) {
-        let sign = undefined;
-        if (piece.isWhite) {
-          sign = 1;
-        } else {
-          sign = -1;
-        }
-
-        // Check if the piece is crowned
-        if (piece.crowned) {
-          eval += sign * crownedPieceVal;
-        }
-        // Otherwise check if the piece is on the edge
-        else if (piece.x === 0 || piece.x === 7) {
-          eval += sign * edgePieceVal;
-        }
-        // If not just add the default piece value
-        else {
-          eval += sign * pieceVal;
-        }
-      }
-    }
-  }
-
-  // Return the evaluation
-  return eval;
 }
 
 function neatifyAllMoves(board) {
@@ -186,7 +136,55 @@ function neatifyAllMoves(board) {
   }
 
   // Return the array of all possible moves
+  console.log(allPossibleMoves);
   return allPossibleMoves;
+}
+
+function staticEval(board) {
+  // Takes a board object and returns a float loosely representing the evaluation of either players
+  // chances to win. A positive outcome means white is evaluated better, a negative outcome means red
+  // Is evaluated as having a better position.
+
+  // Set up some basic values
+  let eval = 0;
+
+  let pieceVal = 1;
+  let edgePieceVal = 1.1;
+  let crownedPieceVal = 1.6;
+
+  // Loop through the board
+  for (let i = 0; i < 8; i++) {
+    for (let j = 0; j < 8; j++) {
+      // Get the square / piece in question
+      let piece = board.board[j][i];
+
+      // Make sure the square is not empty
+      if (!piece.empty) {
+        let sign = undefined;
+        if (piece.isWhite) {
+          sign = 1;
+        } else {
+          sign = -1;
+        }
+
+        // Check if the piece is crowned
+        if (piece.crowned) {
+          eval += sign * crownedPieceVal;
+        }
+        // Otherwise check if the piece is on the edge
+        else if (piece.x === 0 || piece.x === 7) {
+          eval += sign * edgePieceVal;
+        }
+        // If not just add the default piece value
+        else {
+          eval += sign * pieceVal;
+        }
+      }
+    }
+  }
+
+  // Return the evaluation
+  return eval;
 }
 
 function miniMax(board, depth, whiteTurn) {

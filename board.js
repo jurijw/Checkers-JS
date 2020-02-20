@@ -175,6 +175,15 @@ class Board {
     if (intermediateSteps.length > 0) {
       // Remove all pieces in intermediateSteps (All captured pieces)
       for (let step of intermediateSteps) {
+        // FIX!
+        // TEMPFIX - somewhere there is one nested array too many (likely in the simulateCaptureRecursivelyFunction)
+        if (step[1] === undefined) {
+          step = step[0];
+        }
+        // console.log(step);
+        // console.log(step[0]);
+        // console.log(step[1]);
+
         let stepX = step[0];
         let stepY = step[1];
         this.board[stepY][stepX] = new Piece(stepX, stepY, true, true);
