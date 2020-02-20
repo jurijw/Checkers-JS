@@ -136,7 +136,7 @@ function neatifyAllMoves(board) {
   }
 
   // Return the array of all possible moves
-  console.log(allPossibleMoves);
+  //   console.log(allPossibleMoves);
   return allPossibleMoves;
 }
 
@@ -187,15 +187,18 @@ function staticEval(board) {
   return eval;
 }
 
-function miniMax(board, depth, whiteTurn) {
+function miniMax(board, depth) {
   // Base case - max depth reached
   // FIX: need to check for game over
   if (depth === 0) {
-    return staticEval(board);
+    // Cannot get a bestMove with a depth of 0
+    let bestMove = undefined;
+    return [staticEval(board), bestMove];
   }
 
   // Simulate all possible moves
   let simulatedBoards = [];
+  let simulatedMoves = [];
 
   // Get all possible moves (these are in the format [[initialX, initialY, finalX, finalY, intermediateSteps], ..])
   let allMoves = neatifyAllMoves(board);
@@ -215,35 +218,67 @@ function miniMax(board, depth, whiteTurn) {
     // Execute the move on the cloned baord
     clonedBoard.move(initialX, initialY, finalX, finalY, intermediateSteps);
 
-    // Add the board to the simulatedBoards array
+    // Add the board to the simulatedBoards array along with the move that lead to it
     simulatedBoards.push(clonedBoard);
+    simulatedMoves.push(move);
   }
 
-  // adapted from https://www.youtube.com/watch?v=l-hh51ncgDI
+  // @source adapted from https://www.youtube.com/watch?v=l-hh51ncgDI
   // If it's white turn try to maximize the evaluation
-  if (whiteTurn) {
+  if (board.whiteTurn) {
     let maxEval = -Infinity;
+    let bestMove = undefined;
 
     // Loop through all possible child positions
-    for (let simulatedBoard of simulatedBoards) {
+    for (let i = 0; i < simulatedBoards.length; i++) {
+      let simulatedBoard = simulatedBoards[i];
+      let simulatedMove = simulatedMoves[i];
+
       // Recursively call the miniMax function
-      eval = miniMax(simulatedBoard, depth - 1, false);
+      let miniMaxInfo = miniMax(simulatedBoard, depth - 1);
+
+      // Get the evaluation
+      eval = miniMaxInfo[0];
+
       // Determine the maximizing evaluation and return it
-      maxEval = max(eval, maxEval);
-      return maxEval;
+      if (eval > maxEval) {
+        // Save the move that got to that position
+        bestMove = simulatedMove;
+
+        // Update the max evaluation
+        maxEval = eval;
+      }
+
+      // Return the new max evaluation
+      return [maxEval, bestMove];
     }
   }
   // Otherwise, try to minimize the evaluation
   else {
     let minEval = Infinity;
+    let bestMove = undefined;
 
     // Loop through all possible child positions
-    for (let simulatedBoard of simulatedBoards) {
+    for (let i = 0; i < simulatedBoards.length; i++) {
+      let simulatedBoard = simulatedBoards[i];
+      let simulatedMove = simulatedMoves[i];
+
       // Recursively call the miniMax function
-      eval = miniMax(simulatedBoard, depth - 1, true);
+      let miniMaxInfo = miniMax(simulatedBoard, depth - 1);
+
+      // Get the evaluation
+      eval = miniMaxInfo[0];
+
       // Determine the minimizing evaluation and return it
-      minEval = min(eval, minEval);
-      return minEval;
+      if (eval < minEval) {
+        // Save the move that got to that position
+        bestMove = simulatedMove;
+        // Update the minimum evaluation
+        minEval = eval;
+      }
+
+      // Return the new minimum evaluation
+      return [minEval, bestMove];
     }
   }
 }
