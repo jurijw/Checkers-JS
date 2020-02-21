@@ -371,23 +371,3 @@ class Board {
     return clonedBoard;
   }
 }
-
-// function simulateMovesRecursively(boardCopy, piece) {
-//   // Base case - No more capturing moves can be made
-//   if (!boardCopy.validMoves[0]) {
-//     return true;
-//   }
-//   // Recursive case - Capturing moves can be made
-//   else {
-//     for (let moveInfo of boardCopy.validMoves[1]) {
-//       // Disect moveInfo
-//       let initialX = moveInfo[0][0];
-//       let initalY = moveInfo[0][1];
-//       let finalX = moveInfo[1][0][0];
-//       let finalY = moveInfo[1][0][1];
-//       let intermediateSteps = moveInfo[1][1];
-//       // Simulate the move
-//       boardCopy.move(initalX, initalY, finalX, finalY, intermediateSteps);
-//     }
-//   }
-// }

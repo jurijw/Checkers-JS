@@ -3,33 +3,52 @@ const width = 800;
 const height = 800;
 const fps = 60;
 
-// Initialize the board
-const playingBoard = new Board();
-
-// DEBUG: switch to test board
-playingBoard.toTestBoard();
-// Do this once per move
-playingBoard.update();
-
-// let piece =
-// simulateCaptureRecursively(playingBoard, )
-
 // Variables that need to be able to be modified
+let ai = true;
+let aiWhiteTurn = true;
+let recursionDepth = 5;
+
 let started = false;
 let selectionX = undefined;
 let selectionY = undefined;
+
+// Initialize the board
+let playingBoard = new Board();
+
+// DEBUG: switch to test board
+// playingBoard.toTestBoard();
 
 function setup() {
   // put setup code here
   createCanvas(width, height);
   frameRate(fps);
   // noCursor();
+
+  // Update the board
+  playingBoard.update();
 }
 
 function draw() {
-  // put drawing code here
+  // Draw the board
   background(139, 93, 46);
   playingBoard.show();
+
+  // If ai mode is selected and it is white's turn make the ai make a move
+  if (ai && playingBoard.whiteTurn) {
+    // Run the minimax funtion and get the best move
+    let [eval, move] = miniMax(playingBoard, recursionDepth);
+
+    console.log(eval, move);
+
+    // Disect the move
+    let [initialX, initialY, finalX, finalY, intermediateSteps] = move;
+
+    // Execute the move
+    playingBoard.move(initialX, initialY, finalX, finalY, intermediateSteps);
+    playingBoard.update();
+    playingBoard.checkForTurnSwitch();
+    playingBoard.update();
+  }
 }
 
 function mousePressed() {
