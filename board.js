@@ -3,6 +3,9 @@ class Board {
     // Track who's turn it is
     this.whiteTurn = false;
 
+    this.gameOver = false;
+    this.whiteWins = undefined;
+
     // Keep track of the last piece that moved
     this.lastMoved = undefined;
     this.captureOnLastMove = false;
@@ -144,17 +147,29 @@ class Board {
   updatePerPieceValidMoves() {
     // Updates the boards valid moves and asigns each piece on the board its valid moves
 
-    for (let moveInfo of this.validMoves[1]) {
-      // Disect moveInfo
-      let initialX = moveInfo[0][0];
-      let initialY = moveInfo[0][1];
-      let finalX = moveInfo[1][0][0];
-      let finalY = moveInfo[1][0][1];
-      let intermediateSteps = moveInfo[1][1];
+    let validMoves = this.validMoves;
 
-      // Get a reference to the piece
-      let piece = this.board[initialY][initialX];
-      piece.validMoves.push([[finalX, finalY], intermediateSteps]);
+    // Check for game over - no valid moves for the current player
+    if (validMoves.length === 0) {
+      this.gameOver = true;
+      if (this.whiteTurn) {
+        this.whiteWins = false;
+      } else {
+        this.whiteWins = true;
+      }
+    } else {
+      for (let moveInfo of validMoves[1]) {
+        // Disect moveInfo
+        let initialX = moveInfo[0][0];
+        let initialY = moveInfo[0][1];
+        let finalX = moveInfo[1][0][0];
+        let finalY = moveInfo[1][0][1];
+        let intermediateSteps = moveInfo[1][1];
+
+        // Get a reference to the piece
+        let piece = this.board[initialY][initialX];
+        piece.validMoves.push([[finalX, finalY], intermediateSteps]);
+      }
     }
   }
 
@@ -309,8 +324,10 @@ class Board {
     this.board[3][3] = new Piece(3, 3, false, false);
     this.board[4][2] = new Piece(2, 4, false, false);
     this.board[4][4] = new Piece(4, 4, false, false);
-    this.board[6][2] = new Piece(2, 6, false, false);
+    this.board[6][4] = new Piece(2, 6, false, false);
   }
+
+  checkForGameOver() {}
 
   update() {
     // Clears some board properties and recalculates valid moves
@@ -323,6 +340,7 @@ class Board {
 
     // Update the boards valid moves
     this.updateValidMoves();
+
     // Update each pieces valid moves
     this.updatePerPieceValidMoves();
   }
@@ -336,6 +354,8 @@ class Board {
     // Clone primitives //
 
     clonedBoard.whiteTurn = this.whiteTurn;
+    clonedBoard.gameOver = this.gameOver;
+    clonedBoard.whiteWins = this.whiteWins;
     clonedBoard.captureOnLastMove = this.captureOnLastMove;
 
     // Clone objects //

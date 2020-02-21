@@ -145,6 +145,15 @@ function staticEval(board) {
   // chances to win. A positive outcome means white is evaluated better, a negative outcome means red
   // Is evaluated as having a better position.
 
+  // If one side has one evaluate that as either + or - infinity
+  if (this.gameOver) {
+    if (this.whiteWins) {
+      return Infinity;
+    } else {
+      return -Infinity;
+    }
+  }
+
   // Set up some basic values
   let eval = 0;
 
@@ -190,7 +199,7 @@ function staticEval(board) {
 function miniMax(board, depth) {
   // Base case - max depth reached
   // FIX: need to check for game over
-  if (depth === 0) {
+  if (depth === 0 || board.gameOver) {
     // Cannot get a bestMove with a depth of 0
     let bestMove = undefined;
     return [staticEval(board), bestMove];
@@ -206,6 +215,7 @@ function miniMax(board, depth) {
   // Loop through all moves
   for (let move of allMoves) {
     // Disect the move
+    // FIX: use unpacking
     let initialX = move[0];
     let initialY = move[1];
     let finalX = move[2];

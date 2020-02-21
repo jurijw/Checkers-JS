@@ -9,6 +9,7 @@ let aiWhiteTurn = true;
 let recursionDepth = 5;
 
 let started = false;
+let gameOver = false;
 let selectionX = undefined;
 let selectionY = undefined;
 
@@ -16,7 +17,10 @@ let selectionY = undefined;
 let playingBoard = new Board();
 
 // DEBUG: switch to test board
-// playingBoard.toTestBoard();
+playingBoard.toTestBoard();
+// let skurr = playingBoard.board[6][2];
+// playingBoard.board[6][4] = skurr;
+// playingBoard.board[6][2] = new Piece(2, 6, true, true);
 
 function setup() {
   // put setup code here
@@ -29,25 +33,37 @@ function setup() {
 }
 
 function draw() {
-  // Draw the board
-  background(139, 93, 46);
-  playingBoard.show();
+  if (!gameOver) {
+    // Draw the board
+    background(139, 93, 46);
+    playingBoard.show();
 
-  // If ai mode is selected and it is white's turn make the ai make a move
-  if (ai && playingBoard.whiteTurn) {
-    // Run the minimax funtion and get the best move
-    let [eval, move] = miniMax(playingBoard, recursionDepth);
+    // Check if the game is over
+    if (playingBoard.gameOver) {
+      gameOver = true;
+      if (playingBoard.whiteWins) {
+        console.log("White wins!");
+      } else {
+        console.log("Red wins!");
+      }
+    }
 
-    console.log(eval, move);
+    // If ai mode is selected and it is white's turn make the ai make a move
+    if (ai && playingBoard.whiteTurn) {
+      // Run the minimax funtion and get the best move
+      let [eval, move] = miniMax(playingBoard, recursionDepth);
 
-    // Disect the move
-    let [initialX, initialY, finalX, finalY, intermediateSteps] = move;
+      console.log(eval, move);
 
-    // Execute the move
-    playingBoard.move(initialX, initialY, finalX, finalY, intermediateSteps);
-    playingBoard.update();
-    playingBoard.checkForTurnSwitch();
-    playingBoard.update();
+      // Disect the move
+      let [initialX, initialY, finalX, finalY, intermediateSteps] = move;
+
+      // Execute the move
+      playingBoard.move(initialX, initialY, finalX, finalY, intermediateSteps);
+      playingBoard.update();
+      playingBoard.checkForTurnSwitch();
+      playingBoard.update();
+    }
   }
 }
 
