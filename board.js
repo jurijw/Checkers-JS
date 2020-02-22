@@ -307,8 +307,8 @@ class Board {
     }
   }
 
-  toTestBoard() {
-    // Set up a board for testing double captures
+  toTestBoard(index) {
+    // Set up a board for testing various scenarious
 
     // Clear the board
     for (let i = 0; i < 8; i++) {
@@ -317,14 +317,29 @@ class Board {
       }
     }
 
-    // Add pieces
-    this.board[1][1] = new Piece(1, 1, true, false);
-    this.board[1][5] = new Piece(5, 1, true, false);
+    if (index === 0) {
+      // Add pieces
+      this.board[1][1] = new Piece(1, 1, true, false);
+      this.board[1][5] = new Piece(5, 1, true, false);
 
-    this.board[3][3] = new Piece(3, 3, false, false);
-    this.board[4][2] = new Piece(2, 4, false, false);
-    this.board[4][4] = new Piece(4, 4, false, false);
-    this.board[6][4] = new Piece(2, 6, false, false);
+      this.board[3][3] = new Piece(3, 3, false, false);
+      this.board[4][2] = new Piece(2, 4, false, false);
+      this.board[4][4] = new Piece(4, 4, false, false);
+      this.board[6][4] = new Piece(2, 6, false, false);
+    }
+
+    if (index === 1) {
+      // Add pieces
+      this.board[1][1] = new Piece(1, 1, true, false);
+      this.board[1][5] = new Piece(5, 1, true, false);
+
+      this.board[2][2] = new Piece(2, 2, false, false);
+      this.board[4][2] = new Piece(2, 4, false, false);
+      this.board[4][4] = new Piece(4, 4, false, false);
+      this.board[6][4] = new Piece(2, 6, false, false);
+
+      playingBoard.whiteTurn = true;
+    }
   }
 
   checkForGameOver() {}

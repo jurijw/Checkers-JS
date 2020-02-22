@@ -1,3 +1,5 @@
+// FIX: not fully working!!!
+
 function simulateCaptureRecursively(board, piece, stepSequence = undefined) {
   // Takes a piece that can capture and simulates all possible sequential capturing routes
 
@@ -42,7 +44,8 @@ function simulateCaptureRecursively(board, piece, stepSequence = undefined) {
     let finalX = validMoves[i][0][0];
     let finalY = validMoves[i][0][1];
     // FIX? previously was
-    let intermediateStep = validMoves[i][1];
+    let intermediateStep = validMoves[i][1][0];
+    console.log(intermediateStep[0]);
     //let intermediateStep = validMoves[i][1][0];
 
     // Add the intermediate step to the stepSequence array //
@@ -74,6 +77,51 @@ function simulateCaptureRecursively(board, piece, stepSequence = undefined) {
   }
   // Return the final step sequence
   return stepSequence;
+}
+
+function getSequentialMoves(board, piece) {
+  let sequentialMoveArray = [];
+  let pieceValidMoves = piece.validMoves;
+  // Base case - no moves left
+  if (pieceValidMoves.length === 0) {
+    // Update the final position of the piece (stored at the 0th index)
+    sequentialMoveArray[0] = [piece.x, piece.y];
+    return sequentialMoveArray;
+  }
+
+  // Base case - No more capturing moves available
+  let canCapture = false;
+  for (let i = 0; i < pieceValidMoves.length; i++) {
+    if (pieceValidMoves[i][1].length > 0) {
+      canCapture = true;
+      break;
+    }
+  }
+  if (!canCapture) {
+    // Update the final position of the piece (stored at the 0th index)
+    sequentialMoveArray[0] = [piece.x, piece.y];
+    return sequentialMoveArray;
+  }
+
+  // Recursive case - captures can be made
+  for (let i = 0; i < pieceValidMoves.length; i++) {
+    let pieceValidMove = pieceValidMoves[i];
+    // Disect the move
+    let finalX = pieceValidMove[0][0];
+    let finalY = pieceValidMove[0][1];
+    let intermediateStep = pieceValidMove[1][0];
+
+    // Clone the board, get a reference to the cloned piece, and simulate the move
+    let clonedBoard = board.clone();
+    let clonedPiece = clonedBoard.board[piece.y][piece.x];
+    clonedBoard.move(clonedPiece.x, clonedPiece.y, finalX, finalY, [
+      intermediateStep
+    ]);
+    clonedBoard.update();
+
+    sequentialMoveArray.push(getSequentialMoves(clonedBoard, clonedPiece));
+    return sequentialMoveArray;
+  }
 }
 
 function neatifyAllMoves(board) {
@@ -145,9 +193,9 @@ function staticEval(board) {
   // chances to win. A positive outcome means white is evaluated better, a negative outcome means red
   // Is evaluated as having a better position.
 
-  // If one side has one evaluate that as either + or - infinity
-  if (this.gameOver) {
-    if (this.whiteWins) {
+  // If one side has won evaluate that as either + or - infinity
+  if (board.gameOver) {
+    if (board.whiteWins) {
       return Infinity;
     } else {
       return -Infinity;
@@ -248,7 +296,7 @@ function miniMax(board, depth) {
       let miniMaxInfo = miniMax(simulatedBoard, depth - 1);
 
       // Get the evaluation
-      eval = miniMaxInfo[0];
+      let eval = miniMaxInfo[0];
 
       // Determine the maximizing evaluation and return it
       if (eval > maxEval) {
@@ -277,7 +325,7 @@ function miniMax(board, depth) {
       let miniMaxInfo = miniMax(simulatedBoard, depth - 1);
 
       // Get the evaluation
-      eval = miniMaxInfo[0];
+      let eval = miniMaxInfo[0];
 
       // Determine the minimizing evaluation and return it
       if (eval < minEval) {

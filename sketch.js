@@ -4,7 +4,7 @@ const height = 800;
 const fps = 60;
 
 // Variables that need to be able to be modified
-let ai = true;
+let ai = false;
 let aiWhiteTurn = true;
 let recursionDepth = 5;
 
@@ -15,9 +15,9 @@ let selectionY = undefined;
 
 // Initialize the board
 let playingBoard = new Board();
-
 // DEBUG: switch to test board
-playingBoard.toTestBoard();
+playingBoard.toTestBoard(1);
+let piece = playingBoard.board[1][1];
 // let skurr = playingBoard.board[6][2];
 // playingBoard.board[6][4] = skurr;
 // playingBoard.board[6][2] = new Piece(2, 6, true, true);
